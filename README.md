@@ -1,5 +1,7 @@
 # gcplog-rs
 
+![Crates.io](https://img.shields.io/crates/v/testscript-rs)
+
 A Rust tracing subscriber that emits logs to stderr as newline-delimited JSON in the format expected by Google Cloud Logging.
 
 ## Usage
