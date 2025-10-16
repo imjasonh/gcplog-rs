@@ -2,6 +2,8 @@
 name = "gcplog-rs"
 version = "0.1.0"
 edition = "2021"
+description = "A Rust tracing subscriber that emits logs as JSON for Google Cloud Logging"
+license = "Apache-2.0"
 
 [dependencies]
 chrono = { version = "0.4", features = ["serde"] }
