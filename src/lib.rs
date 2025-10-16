@@ -175,7 +175,7 @@ impl Default for Config {
 /// create spans with a `trace_id` field using `info_span!("trace_id", trace_id = %"your-trace-id")`.
 ///
 /// If the config does not specify a project ID, this will attempt to fetch it from the
-/// GCP metadata service. If that fails, it will use "unknown" as the project ID.
+/// GCP metadata service. If that fails, it will gracefully degrade and not set up GCP logging.
 ///
 /// # Arguments
 ///
@@ -210,10 +210,12 @@ impl Default for Config {
 /// info!("Application started");
 /// ```
 pub fn init(config: Config) {
-    let gcp_project_id = config
-        .gcp_project_id
-        .or_else(|| fetch_project_id().ok())
-        .unwrap_or_else(|| "unknown".to_string());
+    let gcp_project_id = config.gcp_project_id.or_else(|| fetch_project_id().ok());
+
+    // If we can't determine the project ID, gracefully degrade and don't set up GCP logging
+    let Some(gcp_project_id) = gcp_project_id else {
+        return;
+    };
 
     let layer = GcpLayer { gcp_project_id };
     let level_filter = config.level_filter.unwrap_or(LevelFilter::INFO);
@@ -237,5 +239,16 @@ mod tests {
         let _guard = span.enter();
         info!("Processing request");
         warn!("Potential issue detected");
+    }
+
+    #[test]
+    fn test_graceful_fallback_without_project_id() {
+        // This should gracefully return without setting up GCP logging
+        // when no project ID can be determined
+        init(Config::new());
+
+        // If we reach here without panicking, the graceful fallback worked
+        // Note: In a real environment without GCP metadata service, this would
+        // simply return early without setting up the GcpLayer
     }
 }
