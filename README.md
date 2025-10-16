@@ -4,6 +4,8 @@
 
 A Rust tracing subscriber that emits logs to stderr as newline-delimited JSON in the format expected by Google Cloud Logging.
 
+Inspired by [`clog/gcp` in Go](https://github.com/chainguard-dev/clog/tree/main/gcp)
+
 ## Usage
 
 ```rust
